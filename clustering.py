@@ -31,7 +31,7 @@ class main(object):
             ])
         return df
 
-    def groupBy(self):
+    def groupBy_MainGenre(self):
         df = self.df
         df = self.prep(df)
         df['genres'] = df['genres'].str.split('|')
@@ -46,7 +46,7 @@ class main(object):
         return df
     
     def hopkins(self):
-        df = self.groupBy()
+        df = self.groupBy_MainGenre()
         self.X = np.array(df[[
             'budget','revenue','runtime',
             'voteCount', 'voteAvg','actorsAmount'
@@ -62,9 +62,26 @@ class main(object):
     def vat(self):
         hop, X_scale = self.hopkins()
         pyclustertend.vat(X_scale)
-        pyclustertend.vat(self.X)
+        vat = pyclustertend.vat(self.X)
+        return vat
+
+    def clusterNum(self):
+        hop, X_scale = self.hopkins()
+        numeroClusters = range(1,11)
+        wcss = []
+        for i in numeroClusters:
+            kmeans = cluster.KMeans(n_clusters=i)
+            kmeans.fit(X_scale)
+            wcss.append(kmeans.inertia_)
+
+        plt.plot(numeroClusters, wcss)
+        plt.xlabel("Número de clusters")
+        plt.ylabel("Score")
+        plt.title("Gráfico de Codo")
+        plt.show()
 
 m = main('movies.csv')
-m.groupBy()
-print(m.hopkins()[0])
-m.vat()
+m.groupBy_MainGenre()
+m.hopkins()
+m.clusterNum()
+#m.vat()
